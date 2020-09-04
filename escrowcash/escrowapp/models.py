@@ -18,9 +18,16 @@ class Contract(models.Model):
         ("released_by_arbitrator", "Released By Arbitrator")
     )
 
+    SUPPORTED_TOKEN_CHOICES = (
+        ('4de69e374a8ed21cbddd47f2338cc0f479dc58daa2bbe11cd604ca488eca0ddf', 'SPICE Token'),
+        ('c4b0d62156b3fa5c8f3436079b5394f7edc1bef5dc1cd2f9d0c4d46f82cca479', 'USDH Token'),
+        ('9fc89d6b7d5be2eac0b3787c5b8236bca5de641b5bafafc8f450727b63615c11', 'USDt Token (BCH network)')
+    )
+
     created = models.DateTimeField(auto_now=True)
     modified = models.DateTimeField(auto_now_add=True)
 
+    token = models.CharField(max_length=64, choices=SUPPORTED_TOKEN_CHOICES)
     contract_amount = models.DecimalField(
         max_digits=8, decimal_places=4,
         validators=[MinValueValidator(Decimal("10.0"))]
