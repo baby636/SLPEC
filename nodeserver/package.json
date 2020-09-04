@@ -15,6 +15,7 @@
   "author": "OPReturnCode",
   "license": "ISC",
   "dependencies": {
-    "express": "^4.17.1"
+    "express": "^4.17.1",
+    "jeton-lib": "^2.1.0"
   }
 }
