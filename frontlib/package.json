@@ -1,0 +1,14 @@
+{
+  "name": "frontlib",
+  "version": "0.0.1",
+  "description": "",
+  "main": "escrow.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "OPReturnCode",
+  "dependencies": {
+    "crypto-js": "^4.0.0",
+    "jeton-lib": "^2.1.0"
+  }
+}
