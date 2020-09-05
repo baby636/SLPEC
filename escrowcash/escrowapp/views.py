@@ -74,3 +74,13 @@ class AcceptDeclineContractOfferView(generic.UpdateView):
         self.object = form.save(commit=False)
         self.object.accept_and_build_escrow_smart_contract()
         return HttpResponseRedirect("")  # TODO: CHANGE!
+
+
+class ContractListView(generic.ListView):
+    model = Contract
+    template_name = 'escrowapp/contract_list.html'
+
+
+class ContractDetailView(generic.DetailView):
+    model = Contract
+    template_name = 'escrowapp/contract_details.html'
