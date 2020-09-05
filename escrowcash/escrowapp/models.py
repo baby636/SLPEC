@@ -47,7 +47,12 @@ class Contract(models.Model):
 
     party_making_offer = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='contracts_made', on_delete=models.CASCADE)
     party_taking_offer = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='contracts_accepted', on_delete=models.CASCADE)
-    party_released_escrow = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='contracts_released', on_delete=models.CASCADE)
+    party_released_escrow = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        related_name='contracts_released',
+        on_delete=models.CASCADE,
+        blank=True, null=True
+    )
 
     def accept_and_build_escrow_smart_contract(self):
         url = settings.SMART_CONTRACT_SERVER_URL + '/api/build_escrow_contract'
