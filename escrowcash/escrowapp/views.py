@@ -1,11 +1,18 @@
-from django.http import HttpResponseRedirect
+import time
+import requests
+
+from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import render, get_object_or_404
 from django.views import generic
 from django.contrib.auth import get_user_model
 from django import forms
-from django.urls import reverse_lazy
+from django.urls import reverse_lazy, reverse
+from django.conf import settings
+from django.views.decorators.csrf import csrf_exempt
 
 from .models import Contract
+from . import bip70_pb2
+
 User = get_user_model()
 # Create your views here.
 
@@ -84,3 +91,77 @@ class ContractListView(generic.ListView):
 class ContractDetailView(generic.DetailView):
     model = Contract
     template_name = 'escrowapp/contract_details.html'
+
+
+@csrf_exempt
+def generate_payment_request(request, pk):
+    contract = get_object_or_404(Contract, pk=pk, state='accepted')
+
+    url = settings.SMART_CONTRACT_SERVER_URL + '/api/create_op_return_outputs'
+    result = requests.post(
+        url=url,
+        data={
+            'address': contract.contract_cash_address,
+            'token': contract.token,
+            'amount': int(contract.contract_amount * 10 ** 8).split('.')[0]
+        }
+    )
+    assert result.status_code == 200
+    output_data = result.json()
+    out_script_hex_list = [
+        output_data['op_return'],
+        output_data['contract_output'],
+        output_data['fee_output']
+    ]
+
+    outputs = list()
+    amount = 0
+    for output in out_script_hex_list:
+        outputs.append(
+            bip70_pb2.Output(
+                script=bytes.fromhex(output),
+                amount=amount
+            )
+        )
+        # change to dust amount after non op return data
+        if amount == 0:
+            amount = 546
+
+    payment_details = bip70_pb2.PaymentDetails(
+        outputs=outputs,
+        time=time.time(),
+        memo='FREEDOM!',
+        payment_url=request.build_absolute_url(reverse('handle_payment', kwargs={'pk': pk}))
+    )
+    payment_request = bip70_pb2.PaymentRequest(
+        serialized_payment_details=payment_details.SerializeToString()
+    )
+
+    return HttpResponse(
+        payment_request.SerializeToString(),
+        content_type='application/simpleledger-paymentrequest',
+    )
+
+@csrf_exempt
+def handle_payment(request, pk):
+    contract = get_object_or_404(Contract, pk=pk, state='accepted')
+
+    if request.method == 'POST':
+        payment = bip70_pb2.Payment()
+        payment.ParseFromString(request.body)
+        transaction_hex = payment.transactions[0].hex()
+
+        # broadcast the transaction
+        # TODO: do validation
+        url = settings.BCH_REST_API_BASE_URL +\
+            '/rawtransactions/sendRawTransaction' + transaction_hex
+        result = requests.get(url)
+        if not result.status_code == 200:
+            print(result.text)
+        print("contract funded:", contract.fund_contract())
+
+        payment_ack = bip70_pb2.PaymentACK(payment=payment)
+        return HttpResponse(
+            payment_ack.SerializeToString(),
+            content_type='application/simpleledger-paymentrequest',
+        )

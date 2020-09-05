@@ -123,3 +123,4 @@ LOGIN_REDIRECT_URL = '/'
 STATIC_URL = '/static/'
 
 SMART_CONTRACT_SERVER_URL = 'http://localhost:3000'
+BCH_REST_API_BASE_URL = 'https://rest.bitcoin.com/v2'
