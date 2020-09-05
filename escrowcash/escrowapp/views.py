@@ -53,3 +53,24 @@ class CreateContractOfferView(generic.CreateView):
 
     template_name = 'escrowapp/create_contract_offer.html'
     # success_url = ?
+
+
+class AcceptDeclineContractOfferView(generic.UpdateView):
+    model = Contract
+    fields = (
+        'offer_accepted',
+        'party_taking_offer_pub_key',
+        'party_taking_offer_encrypted_priv_key'
+    )
+    template_name = 'escrowapp/update_contract_offer.html'
+
+    def get_form(self, *args, **kwargs):
+        form = super().get_form(*args, **kwargs)
+        form.fields['party_taking_offer_pub_key'].widget = forms.HiddenInput()
+        form.fields['party_taking_offer_encrypted_priv_key'].widget = forms.HiddenInput()
+        return form
+
+    def form_valid(self, form):
+        self.object = form.save(commit=False)
+        self.object.accept_and_build_escrow_smart_contract()
+        return HttpResponseRedirect("")  # TODO: CHANGE!

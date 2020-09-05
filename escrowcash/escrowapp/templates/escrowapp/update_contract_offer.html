@@ -1,0 +1,16 @@
+{% load static %}
+
+<form id="update_offer_form" method="post">
+    {% csrf_token %}
+    {{form}}
+    <button type="submit">Submit</button>
+</form>
+<script src="{% static 'escrowapp/js/escrow.js' %}"></script>
+<script>
+    contractCreationAcceptanceFormHandler(
+        'update_offer_form',
+        'id_party_taking_offer_pub_key',
+        'id_party_taking_offer_encrypted_priv_key',
+        window.localStorage.getItem('token')
+    )
+</script>
