@@ -1,5 +1,7 @@
 const express = require('express')
 const jeton = require('jeton-lib')
+const slpMdm = require('slp-mdm')
+const BigNumber = require('bignumber.js')
 
 
 const expressApp = express()
@@ -49,6 +51,34 @@ expressApp.post('/api/release_contract', (req, res) => {
         signature: signature.toString()
     })
 
+})
+
+expressApp.post('/api/create_op_return_outputs', (req, res) => {
+    BigNumber.set({ROUNDING_MODE: BigNumber.ROUND_UP})
+
+    const arbitratorPubKey = jeton.PublicKey(arbitratorPublicKeyString)
+    const feeAddress = arbitratorPubKey.toAddress()
+    const contractAddress = jeton.Address(req.body.address)
+    const token = req.body.token
+    const amount = new BigNumber(req.body.amount)
+    const fee = amount.times(0.01)
+
+
+    const OPReturnScript = slpMdm.TokenType1.send(
+        token,
+        [amount.integerValue(), fee.integerValue()]
+    ).toString('hex')
+    const contractOutScript = script = jeton.Script.buildPublicKeyHashOut(contractAddress).toHex()
+    const feeOutScript = script = jeton.Script.buildPublicKeyHashOut(feeAddress).toHex()
+
+    res.status(200).send(
+        {
+            success: true,
+            op_return: OPReturnScript,
+	    contract_output: contractOutScript,
+	    fee_output: feeOutScript
+        }
+    )
 })
 
 expressApp.listen(3000, ()=>{console.log('server listening on port 3000')})
