@@ -74,3 +74,19 @@ class Contract(models.Model):
         self.offer_accepted = False
         self.state = self.CONTRACT_STATES[2][0]  # offer_declined
         self.save()
+
+    def fund_contract(self):
+        url = settings.BCH_REST_API_BASE_URL +\
+              '/slp/balancesForAddress/' + self.contract_cash_address
+        contract_address_balance_http_result = requests.get(url=url)
+        assert contract_address_balance_http_result.status_code == 200
+        contract_address_balance = contract_address_balance_http_result.json()
+        for row in contract_address_balance:
+            if row['tokenId'] == self.token:
+                address_balance = row['balance'] * 10 ** row['decimalCount']
+                print('address balance:', address_balance)
+                if row['balance'] * 10 ** row['decimalCount'] >= self.contract_amount * 10000:  # 10000 because of 4 decimal places of contract_amount
+                    self.state = self.CONTRACT_STATES[3][0]
+                    self.save()
+                    return True
+        return False
