@@ -52,7 +52,7 @@ class CreateContractOfferView(generic.CreateView):
         return form_kwargs
 
     template_name = 'escrowapp/create_contract_offer.html'
-    # success_url = ?
+    success_url = reverse_lazy('contract_list')
 
 
 class AcceptDeclineContractOfferView(generic.UpdateView):
@@ -73,7 +73,7 @@ class AcceptDeclineContractOfferView(generic.UpdateView):
     def form_valid(self, form):
         self.object = form.save(commit=False)
         self.object.accept_and_build_escrow_smart_contract()
-        return HttpResponseRedirect("")  # TODO: CHANGE!
+        return HttpResponseRedirect(reverse_lazy('contract_details', kwargs={'pk': self.object.pk}))
 
 
 class ContractListView(generic.ListView):
