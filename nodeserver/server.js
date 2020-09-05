@@ -34,4 +34,21 @@ expressApp.post('/api/build_escrow_contract', (req, res) => {
     )
 })
 
+expressApp.post('/api/release_contract', (req, res) => {
+    const message = req.body.message
+    const arbitratorPrivateKey = jeton.PrivateKey(arbitratorPrivateKeyWIF)
+
+    // make sure message is valid
+    assert(message == 'partyOneTakes' || message == 'partyTwoTakes')
+
+    // signature for taker party to spend the funds
+    const signature = jeton.Signature.signCDS(message, arbitratorPrivateKey)
+
+    res.status(200).send({
+        success: true,
+        signature: signature.toString()
+    })
+
+})
+
 expressApp.listen(3000, ()=>{console.log('server listening on port 3000')})
