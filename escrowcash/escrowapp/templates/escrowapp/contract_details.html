@@ -43,7 +43,7 @@
 {% if object.state == "released" %}
     <h3>Contract finished.</h3>
     {% if request.user == object.party_contract_released_to %}
-        <button class="btn btn-success">Withdraw funds</button>
+        <button class="btn btn-success" onclick="withdraw()">Withdraw funds</button>
     {% endif %}
 {% endif %}
 {% endblock %}
@@ -78,7 +78,13 @@
             encryptedPrivKey = "{{object.party_making_offer_encrypted_priv_key}}"
     {% endif %}
 
-    const postOfficeURL = ""
-   // withdrawFunds(withdrawAddress, token,
+    const postOfficeURL = "http://127.0.0.1:3000/"
+   function withdraw() {
+        withdrawFunds(
+            withdrawAddress, token, arbitratorPublicKeyString, partyMakingOfferPubKeyString,
+            partyTakingOfferPubKeyString, encryptedPrivKey, encryptedPrivKeySecret, message,
+            postOfficeURL
+        )
+   }
 </script>
 {% endblock %}
