@@ -1,51 +1,53 @@
+{% extends 'escrowapp/base.html' %}
 {% load static %}
-
-{{object.state}}
-
-<!--<a href="simpleledger:?r=http://{{request.META.HTTP_HOST}}{% url 'payment_request' object.pk %}">-->
+{% block content %}
+<h2>Contract State: {{object.state}}</h2>
+</br>
+<!--<a class="btn btn-success" href="simpleledger:?r=http://{{request.META.HTTP_HOST}}{% url 'payment_request' object.pk %}">-->
 <!--    simpleledger:?r=http://{{request.META.HTTP_HOST}}{% url 'payment_request' object.pk %}-->
 <!--</a>-->
 {% if object.state == "offer" %}
     {% if request.user == object.party_making_offer %}
-        <p>Please wait for the other party to accept or reject the contract.</p>
+        <h3>Please wait for the other party to accept or reject the contract.</h3>
     {% endif %}
     {% if request.user == object.party_taking_offer %}
-        <p><a href="{% url 'accept_reject' object.pk %}">Accept/Reject the contract</a></p>
+        <p><a class="btn btn-success" href="{% url 'accept_reject' object.pk %}">Accept/Reject the contract</a></p>
     {% endif %}
 {% endif %}
 {% if object.state == "accepted" %}
     {% if request.user == object.party_making_offer %}
-        <p><a href="{% url 'fund_contract' object.pk %}">Fund the contract</a></p>
+        <p><a class="btn btn-success" href="{% url 'fund_contract' object.pk %}">Fund the contract</a></p>
     {% endif %}
     {% if request.user == object.party_taking_offer %}
-        <p>Please wait for the other party to fund the contract.</p>
+        <h3>Please wait for the other party to fund the contract.</h3>
     {% endif %}
 {% endif %}
 {% if object.state == "offer_declined" %}
     {% if request.user == object.party_making_offer %}
-        <p>The other party has rejected your offer.</p>
+        <h3>The other party has rejected your offer.</h3>
     {% endif %}
     {% if request.user == object.party_taking_offer %}
-        <p>You rejected this offer.</p>
+        <h3>You rejected this offer.</h3>
     {% endif %}
 {% endif %}
 {% if object.state == "contract_funded" %}
     {% if request.user == object.party_making_offer %}
-        <p>Please wait for the other party to finish the contract and then release.</p>
+        <h3>Please wait for the other party to finish the contract and then release.</h3>
     {% endif %}
     {% if request.user == object.party_taking_offer %}
-        <p>You can refund the other party in case of an issue.</p>
+        <h3>You can refund the other party in case of an issue.</h3>
     {% endif %}
-    <p><a href="{% url 'release_contract_fund' object.pk %}">Release the contract fund</a></p>
+    <h3><a class="btn btn-success" href="{% url 'release_contract_fund' object.pk %}">Release the contract fund</a></h3>
 
 {% endif %}
 {% if object.state == "released" %}
-    <p>Contract finished.</p>
+    <h3>Contract finished.</h3>
     {% if request.user == object.party_contract_released_to %}
-        <button>Withdraw funds</button>
+        <button class="btn btn-success">Withdraw funds</button>
     {% endif %}
 {% endif %}
-
+{% endblock %}
+{% block scripts %}
 <script src="https://cdn.jsdelivr.net/npm/bitcoincom-link@0.1.10-ping02/lib/bitcoincom-link.min.js"></script>
 <script>
     var withdrawAddress;
@@ -79,3 +81,4 @@
     const postOfficeURL = ""
    // withdrawFunds(withdrawAddress, token,
 </script>
+{% endblock %}

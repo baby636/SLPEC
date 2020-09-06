@@ -1,5 +1,6 @@
+{% extends 'escrowapp/base.html' %}
 {% load static %}
-
+{% block content %}
 <p>Please send {{object.contract_amount}} USDf to the following address:</p>
 <p id="address"></p>
 
@@ -9,6 +10,8 @@
     <button type="submit">Funded</button>
 </form>
 
+{% endblock %}
+{% block scripts %}
 <script src="https://unpkg.com/bchaddrjs-slp@0.2.8/dist/bchaddrjs-slp-0.2.8.min.js"></script>
 <script>
     const slpAddress = bchaddr.toSlpAddress("{{object.contract_cash_address}}")
@@ -44,3 +47,4 @@
 
 
 </script>
+{% endblock %}

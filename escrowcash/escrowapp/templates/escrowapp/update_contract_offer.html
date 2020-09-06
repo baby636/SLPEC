@@ -1,10 +1,13 @@
+{% extends 'escrowapp/base.html' %}
 {% load static %}
-
+{% block content %}
 <form id="update_offer_form" method="post">
     {% csrf_token %}
     {{form}}
     <button type="submit">Submit</button>
 </form>
+{% endblock %}
+{% block scripts %}
 <script src="{% static 'escrowapp/js/escrow.js' %}"></script>
 <script>
     contractCreationAcceptanceFormHandler(
@@ -14,3 +17,4 @@
         window.localStorage.getItem('token')
     )
 </script>
+{% endblock %}
