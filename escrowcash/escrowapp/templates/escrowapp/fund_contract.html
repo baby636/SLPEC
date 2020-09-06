@@ -1,5 +1,32 @@
-<form id="release_contract_fund_form" method="post">
+{% load static %}
+
+<p>Please send {{object.contract_amount}} USDf to the following address:</p>
+<p id="address"></p>
+
+<form id="fund_contract_form" method="post">
     {% csrf_token %}
     {{form}}
     <button type="submit">Funded</button>
 </form>
+
+<script src="https://unpkg.com/bchaddrjs-slp@0.2.8/dist/bchaddrjs-slp-0.2.8.min.js"></script>
+<script>
+    const slpAddress = bchaddr.toSlpAddress("{{object.contract_cash_address}}")
+    document.getElementById("address").innerText = slpAddress
+</script>
+<script src="{% static 'escrowapp/js/escrow.js' %}"></script>
+<script>
+    const token = "{{object.token}}"
+    const contractAmount = {{object.contract_amount}} * 10 **8
+    function submitOnFund() {
+        getSLPBalanceForToken(slpAddress, token).then((res) =>{
+            if ( res == contractAmount) {
+                const form = document.getElementById("fund_contract_form")
+                form.submit()
+            }
+        })
+    }
+    setTimeout(()=>{
+        submitOnFund
+    } ,5000)
+</script>

@@ -1,19 +1,81 @@
-{{object}}
-<a href="simpleledger:?http://{{request.META.HTTP_HOST}}{% url 'payment_request' object.pk %}">
-    simpleledger:?http://{{request.META.HTTP_HOST}}{% url 'payment_request' object.pk %}
-</a>
+{% load static %}
+
+{{object.state}}
+
+<!--<a href="simpleledger:?r=http://{{request.META.HTTP_HOST}}{% url 'payment_request' object.pk %}">-->
+<!--    simpleledger:?r=http://{{request.META.HTTP_HOST}}{% url 'payment_request' object.pk %}-->
+<!--</a>-->
+{% if object.state == "offer" %}
+    {% if request.user == object.party_making_offer %}
+        <p>Please wait for the other party to accept or reject the contract.</p>
+    {% endif %}
+    {% if request.user == object.party_taking_offer %}
+        <p><a href="{% url 'accept_reject' object.pk %}">Accept/Reject the contact</a></p>
+    {% endif %}
+{% endif %}
+{% if object.state == "accepted" %}
+    {% if request.user == object.party_making_offer %}
+        <p><a href="{% url 'fund_contract' object.pk %}">Fund the contact</a></p>
+    {% endif %}
+    {% if request.user == object.party_taking_offer %}
+        <p>Please wait for the other party to fund the contract.</p>
+    {% endif %}
+{% endif %}
+{% if object.state == "offer_declined" %}
+    {% if request.user == object.party_making_offer %}
+        <p>The other party has rejected your offer.</p>
+    {% endif %}
+    {% if request.user == object.party_taking_offer %}
+        <p>You rejected this offer.</p>
+    {% endif %}
+{% endif %}
+{% if object.state == "contract_funded" %}
+    {% if request.user == object.party_making_offer %}
+        <p>Please wait for the other party to finish the contract and then release.</p>
+    {% endif %}
+    {% if request.user == object.party_taking_offer %}
+        <p>You can refund the other party in case of an issue.</p>
+    {% endif %}
+    <p><a href="{% url 'release_contract_fund' object.pk %}">Release the contact fund</a></p>
+
+{% endif %}
+{% if object.state == "released" %}
+    <p>Contract finished.</p>
+    {% if request.user == object.party_contract_released_to %}
+        <button>Withdraw funds</button>
+    {% endif %}
+{% endif %}
 
 <script src="https://cdn.jsdelivr.net/npm/bitcoincom-link@0.1.10-ping02/lib/bitcoincom-link.min.js"></script>
 <script>
-    bitcoincomLink.payInvoice({
-      url: 'http://{{request.META.HTTP_HOST}}{% url 'payment_request' object.pk %}',
+    var withdrawAddress;
+    bitcoincomLink.getAddress({
+      protocol: 'BCH',
     }).then((data) => {
-      console.log(data)
-      const {
-        memo,
-      } = data;
-      console.log('Payment processed memo from merchant server: ' + memo);
+        console.log(data)
+        withdrawAddress = data.address
     }).catch((x) => {
         console.log(x)
     });
+</script>
+<script src="{% static 'escrowapp/js/escrow.js' %}"></script>
+<script>
+    const token = "{{object.token}}"
+    const arbitratorPublicKeyString = "{{object.arbitrator_pub_key}}"
+    const partyMakingOfferPubKeyString = "{{object.party_making_offer_pub_key}}"
+    const partyTakingOfferPubKeyString = "{{object.party_taking_offer_pub_key}}"
+    const encryptedPrivKeySecret = localStorage.getItem('token')
+
+    var message
+    var encryptedPrivKey
+    {% if object.party_contract_released_to == object.party_making_offer %}
+            message = "PartyOneTakes"
+            encryptedPrivKey = "{{object.party_making_offer_encrypted_priv_key}}"
+    {% else %}
+            message = "partyTwoTakes"
+            encryptedPrivKey = "{{object.party_making_offer_encrypted_priv_key}}"
+    {% endif %}
+
+    const postOfficeURL = ""
+   // withdrawFunds(withdrawAddress, token,
 </script>
