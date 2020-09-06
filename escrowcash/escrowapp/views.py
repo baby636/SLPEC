@@ -95,7 +95,7 @@ class ContractDetailView(generic.DetailView):
 
 @csrf_exempt
 def generate_payment_request(request, pk):
-    contract = get_object_or_404(Contract, pk=pk, state='accepted')
+    contract = get_object_or_404(Contract, pk=pk)
 
     url = settings.SMART_CONTRACT_SERVER_URL + '/api/create_op_return_outputs'
     result = requests.post(
@@ -103,7 +103,7 @@ def generate_payment_request(request, pk):
         data={
             'address': contract.contract_cash_address,
             'token': contract.token,
-            'amount': int(contract.contract_amount * 10 ** 8).split('.')[0]
+            'amount': int(contract.contract_amount * 10 ** 8)
         }
     )
     assert result.status_code == 200
@@ -129,14 +129,27 @@ def generate_payment_request(request, pk):
 
     payment_details = bip70_pb2.PaymentDetails(
         outputs=outputs,
-        time=time.time(),
+        time=int(time.time()),
+        expires=int(time.time() + 2000000),
+        merchant_data=b'',
         memo='FREEDOM!',
-        payment_url=request.build_absolute_url(reverse('handle_payment', kwargs={'pk': pk}))
+        payment_url=request.build_absolute_uri(reverse('handle_payment', kwargs={'pk': pk})),
     )
     payment_request = bip70_pb2.PaymentRequest(
         serialized_payment_details=payment_details.SerializeToString()
     )
-
+    serialized_payment_request = payment_request.SerializeToString()
+    # url = settings.SMART_CONTRACT_SERVER_URL + '/api/sign_payment_request'
+    # result = requests.post(
+    #     url=url,
+    #     data={'payment_request': serialized_payment_request.hex()}
+    # )
+    #
+    # print(bytes.fromhex(result.json()['payment_request']))
+    # return HttpResponse(
+    #     bytes.fromhex(result.json()['payment_request']),
+    #     content_type='application/simpleledger-paymentrequest',
+    # )
     return HttpResponse(
         payment_request.SerializeToString(),
         content_type='application/simpleledger-paymentrequest',
