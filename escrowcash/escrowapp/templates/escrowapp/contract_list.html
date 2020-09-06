@@ -1,9 +1,22 @@
 {% extends 'escrowapp/base.html' %}
 {% load static %}
 {% block content %}
-<table>
+<h2>Contract List</h2>
+<table class="table">
+    <tr>
+        <th>User making offer</th>
+        <th>User taking offer</th>
+        <th>State</th>
+        <th>Details</th>
+    </tr>
     {% for object in object_list %}
-        {{object}}
+        <tr>
+            <td>{{object.party_making_offer}}</td>
+            <td>{{object.party_making_offer}}</td>
+            <td>{{object.state}}</td>
+            <td><a href="{% url 'contract_details' object.pk %}">Details</a></td>
+        </tr>
+
     {% endfor %}
 </table>
 
