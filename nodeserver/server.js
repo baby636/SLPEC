@@ -46,7 +46,7 @@ expressApp.post('/api/release_contract', (req, res) => {
     const arbitratorPrivateKey = jeton.PrivateKey(arbitratorPrivateKeyWIF)
 
     // make sure message is valid
-    assert(message == 'partyOneTakes' || message == 'partyTwoTakes')
+    //assert(message == 'partyOneTakes' || message == 'partyTwoTakes')
 
     // signature for taker party to spend the funds
     const signature = jeton.Signature.signCDS(message, arbitratorPrivateKey)
