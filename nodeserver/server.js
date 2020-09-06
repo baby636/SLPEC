@@ -1,7 +1,9 @@
+const PaymentProtocol = require('bitcore-payment-protocol')
 const express = require('express')
 const jeton = require('jeton-lib')
 const slpMdm = require('slp-mdm')
 const BigNumber = require('bignumber.js')
+const fs = require('fs')
 
 
 const expressApp = express()
@@ -11,6 +13,8 @@ expressApp.use(express.json())
 // TODO: use a HD wallet instead
 const arbitratorPrivateKeyWIF = 'L22Y7NoNWPrhUbANpGrpcNQuHF2GzHW8J2MaDU6SQ4kcCwWQEmKg'
 const arbitratorPublicKeyString = '025e46fdba10a39410082b5867aea3d5af2f6041ad82787e88cb1efe2574504862'
+const x509Cert = fs.readFileSync('my.crt', "utf8");
+const x509PrivateKey = fs.readFileSync('my.key', "utf8");
 
 
 expressApp.post('/api/build_escrow_contract', (req, res) => {
@@ -22,11 +26,12 @@ expressApp.post('/api/build_escrow_contract', (req, res) => {
         refereePubKey: arbitratorPubKey,
         parties : [
             {message: 'partyOneTakes', pubKey: partyOnePubKey},
-            {message: 'partyTwoTakes', pubkey: partyTwoPubKey}
+            {message: 'partyTwoTakes', pubKey: partyTwoPubKey}
         ]
     }
-    const outScript = new new jeton.escrow.OutputScript(outputScriptData)
-    const escrowCashAddress = outScript.toAddress()
+    const outScript = new jeton.escrow.OutputScript(outputScriptData)
+    console.log(outScript)
+    const escrowCashAddress = outScript.toAddress().toCashAddress()
 
     res.status(200).send(
         {
@@ -68,8 +73,8 @@ expressApp.post('/api/create_op_return_outputs', (req, res) => {
         token,
         [amount.integerValue(), fee.integerValue()]
     ).toString('hex')
-    const contractOutScript = script = jeton.Script.buildPublicKeyHashOut(contractAddress).toHex()
-    const feeOutScript = script = jeton.Script.buildPublicKeyHashOut(feeAddress).toHex()
+    const contractOutScript = jeton.Script.buildPublicKeyHashOut(contractAddress).toHex()
+    const feeOutScript = jeton.Script.buildPublicKeyHashOut(feeAddress).toHex()
 
     res.status(200).send(
         {
@@ -77,6 +82,26 @@ expressApp.post('/api/create_op_return_outputs', (req, res) => {
             op_return: OPReturnScript,
 	    contract_output: contractOutScript,
 	    fee_output: feeOutScript
+        }
+    )
+})
+
+expressApp.post('/api/sign_payment_request', (req, res) => {
+    console.log(req.body)
+
+    const body = PaymentProtocol.PaymentRequest.decode(Buffer.from(req.body.payment_request,'hex'))
+    let paymentRequest = new PaymentProtocol('BCH').makePaymentRequest(body)
+    let certificates = new PaymentProtocol("BCH").makeX509Certificates();
+    certificates.set("certificate", [ x509Cert ]);
+    paymentRequest.set("pki_type", "x509+sha256");
+    paymentRequest.set("pki_data", certificates.serialize());
+    paymentRequest.sign(x509PrivateKey)
+    
+    console.log(paymentRequest)
+    res.status(200).send(
+        {
+            success: true,
+            payment_request: paymentRequest.serialize().toString('hex'),
         }
     )
 })

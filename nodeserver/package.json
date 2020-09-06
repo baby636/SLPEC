@@ -15,7 +15,9 @@
   "author": "OPReturnCode",
   "license": "ISC",
   "dependencies": {
+    "bitcore-payment-protocol": "^8.1.1",
     "express": "^4.17.1",
-    "jeton-lib": "^2.1.0"
+    "jeton-lib": "^2.1.0",
+    "slp-mdm": "0.0.6"
   }
 }
