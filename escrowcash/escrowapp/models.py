@@ -19,6 +19,7 @@ class Contract(models.Model):
     )
 
     SUPPORTED_TOKEN_CHOICES = (
+        ('21b7074cb38d5b6ceba82cc8af4e61c16399529fc5d93d43e3fdc5aa21e8fa08', 'USDf (USD Fake) Token'),
         ('4de69e374a8ed21cbddd47f2338cc0f479dc58daa2bbe11cd604ca488eca0ddf', 'SPICE Token'),
         ('c4b0d62156b3fa5c8f3436079b5394f7edc1bef5dc1cd2f9d0c4d46f82cca479', 'USDH Token'),
         ('9fc89d6b7d5be2eac0b3787c5b8236bca5de641b5bafafc8f450727b63615c11', 'USDt Token (BCH network)')
@@ -29,7 +30,7 @@ class Contract(models.Model):
 
     token = models.CharField(max_length=64, choices=SUPPORTED_TOKEN_CHOICES)
     contract_amount = models.DecimalField(
-        max_digits=8, decimal_places=4,
+        max_digits=12, decimal_places=8,
         validators=[MinValueValidator(Decimal("10.0"))]
     )
     contract_terms = models.TextField()
@@ -85,7 +86,7 @@ class Contract(models.Model):
             if row['tokenId'] == self.token:
                 address_balance = row['balance'] * 10 ** row['decimalCount']
                 print('address balance:', address_balance)
-                if row['balance'] * 10 ** row['decimalCount'] >= self.contract_amount * 10000:  # 10000 because of 4 decimal places of contract_amount
+                if row['balance'] * 10 ** row['decimalCount'] >= self.contract_amount * 100000000:  # 100000000 because of 4 decimal places of contract_amount
                     self.state = self.CONTRACT_STATES[3][0]
                     self.save()
                     return True
