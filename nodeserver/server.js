@@ -53,7 +53,8 @@ expressApp.post('/api/release_contract', (req, res) => {
 
     res.status(200).send({
         success: true,
-        signature: signature.toString()
+        signature: signature.toString(),
+	    arbitrator_pub_key: arbitratorPublicKeyString
     })
 
 })
@@ -80,8 +81,8 @@ expressApp.post('/api/create_op_return_outputs', (req, res) => {
         {
             success: true,
             op_return: OPReturnScript,
-	    contract_output: contractOutScript,
-	    fee_output: feeOutScript
+            contract_output: contractOutScript,
+            fee_output: feeOutScript
         }
     )
 })
