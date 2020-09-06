@@ -121,6 +121,20 @@ class ReleaseContractFund(generic.UpdateView):
         )
 
 
+@method_decorator(login_required, name='dispatch')
+class FundContract(generic.UpdateView):
+    model = Contract
+    fields = ()
+    template_name = 'escrowapp/fund_contract.html'
+
+    def form_valid(self, form):
+        self.object = form.save(commit=False)
+        if self.object.fund_contract():
+            return HttpResponseRedirect(
+                reverse_lazy('contract_details', kwargs={'pk': self.object.pk})
+            )
+
+
 @csrf_exempt
 def generate_payment_request(request, pk):
     contract = get_object_or_404(Contract, pk=pk)
