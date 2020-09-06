@@ -63747,7 +63747,7 @@ async function withdrawFunds(
     const estimatedTransactionSize = 2920 // just a big number to work TODO: later on calculate this
     // generate post office required data
     const postOfficeReponse = await fetch(postOfficeURL)
-    let postOfficeData = await utxoDataResponse.json()
+    let postOfficeData = await postOfficeReponse.json()
     const postOfficeSLPAddress = postOfficeData.address
     let tokenStampData;
     for (let i=0; i < postOfficeData.stamps.length; i++) {

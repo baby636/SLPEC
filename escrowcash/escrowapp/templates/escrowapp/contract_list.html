@@ -1,7 +1,10 @@
 {% extends 'escrowapp/base.html' %}
 {% load static %}
 {% block content %}
-{% for object in object_list %}
-    {{object}}
-{% endfor %}
+<table>
+    {% for object in object_list %}
+        {{object}}
+    {% endfor %}
+</table>
+
 {% endblock %}
