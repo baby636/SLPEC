@@ -2,13 +2,15 @@ import time
 import requests
 
 from django.http import HttpResponseRedirect, HttpResponse
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import get_object_or_404
 from django.views import generic
 from django.contrib.auth import get_user_model
 from django import forms
 from django.urls import reverse_lazy, reverse
 from django.conf import settings
 from django.views.decorators.csrf import csrf_exempt
+from django.utils.decorators import method_decorator
+from django.contrib.auth.decorators import login_required
 
 from .models import Contract
 from . import bip70_pb2
@@ -17,6 +19,7 @@ User = get_user_model()
 # Create your views here.
 
 
+@method_decorator(login_required, name='dispatch')
 class CreateContractOfferView(generic.CreateView):
     model = Contract
     fields = (
@@ -62,6 +65,7 @@ class CreateContractOfferView(generic.CreateView):
     success_url = reverse_lazy('contract_list')
 
 
+@method_decorator(login_required, name='dispatch')
 class AcceptDeclineContractOfferView(generic.UpdateView):
     model = Contract
     fields = (
@@ -83,16 +87,19 @@ class AcceptDeclineContractOfferView(generic.UpdateView):
         return HttpResponseRedirect(reverse_lazy('contract_details', kwargs={'pk': self.object.pk}))
 
 
+@method_decorator(login_required, name='dispatch')
 class ContractListView(generic.ListView):
     model = Contract
     template_name = 'escrowapp/contract_list.html'
 
 
+@method_decorator(login_required, name='dispatch')
 class ContractDetailView(generic.DetailView):
     model = Contract
     template_name = 'escrowapp/contract_details.html'
 
 
+@method_decorator(login_required, name='dispatch')
 class ReleaseContractFund(generic.UpdateView):
     model = Contract
     fields = ()
