@@ -26,7 +26,21 @@
             }
         })
     }
-    setTimeout(()=>{
-        submitOnFund
-    } ,5000)
+    setTimeout(submitOnFund, 5000)
+</script>
+<script src="https://cdn.jsdelivr.net/npm/bitcoincom-link@0.1.10-ping02/lib/bitcoincom-link.min.js"></script>
+<script>
+    bitcoincomLink.sendAssets({
+      to: slpAddress,
+      protocol: 'SLP',
+      value: {{object.contract_amount}},
+      assetId: "{{object.token}}"
+    }).then((data) => {
+      console.log('Completed transaction id: ' + data.txid);
+      submitOnFund()
+    }).catch((e)=> {
+        console.log(e)
+    });
+
+
 </script>

@@ -10,12 +10,12 @@
         <p>Please wait for the other party to accept or reject the contract.</p>
     {% endif %}
     {% if request.user == object.party_taking_offer %}
-        <p><a href="{% url 'accept_reject' object.pk %}">Accept/Reject the contact</a></p>
+        <p><a href="{% url 'accept_reject' object.pk %}">Accept/Reject the contract</a></p>
     {% endif %}
 {% endif %}
 {% if object.state == "accepted" %}
     {% if request.user == object.party_making_offer %}
-        <p><a href="{% url 'fund_contract' object.pk %}">Fund the contact</a></p>
+        <p><a href="{% url 'fund_contract' object.pk %}">Fund the contract</a></p>
     {% endif %}
     {% if request.user == object.party_taking_offer %}
         <p>Please wait for the other party to fund the contract.</p>
@@ -36,7 +36,7 @@
     {% if request.user == object.party_taking_offer %}
         <p>You can refund the other party in case of an issue.</p>
     {% endif %}
-    <p><a href="{% url 'release_contract_fund' object.pk %}">Release the contact fund</a></p>
+    <p><a href="{% url 'release_contract_fund' object.pk %}">Release the contract fund</a></p>
 
 {% endif %}
 {% if object.state == "released" %}
