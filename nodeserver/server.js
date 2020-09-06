@@ -107,4 +107,4 @@ expressApp.post('/api/sign_payment_request', (req, res) => {
     )
 })
 
-expressApp.listen(3000, ()=>{console.log('server listening on port 3000')})
+expressApp.listen(4000, ()=>{console.log('server listening on port 3000')})
