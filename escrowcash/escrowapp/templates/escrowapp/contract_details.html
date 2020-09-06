@@ -1,1 +1,19 @@
 {{object}}
+<a href="simpleledger:?http://{{request.META.HTTP_HOST}}{% url 'payment_request' object.pk %}">
+    simpleledger:?http://{{request.META.HTTP_HOST}}{% url 'payment_request' object.pk %}
+</a>
+
+<script src="https://cdn.jsdelivr.net/npm/bitcoincom-link@0.1.10-ping02/lib/bitcoincom-link.min.js"></script>
+<script>
+    bitcoincomLink.payInvoice({
+      url: 'http://{{request.META.HTTP_HOST}}{% url 'payment_request' object.pk %}',
+    }).then((data) => {
+      console.log(data)
+      const {
+        memo,
+      } = data;
+      console.log('Payment processed memo from merchant server: ' + memo);
+    }).catch((x) => {
+        console.log(x)
+    });
+</script>
