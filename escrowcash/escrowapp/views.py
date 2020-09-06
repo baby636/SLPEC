@@ -115,7 +115,7 @@ class ReleaseContractFund(generic.UpdateView):
         if releaser == self.object.party_taking_offer:
             user_who_gets_fund = self.object.party_making_offer
 
-        self.object.release_contract_fund(self, user_who_gets_fund, releaser)
+        self.object.release_contract_fund(user_who_gets_fund, releaser)
         return HttpResponseRedirect(
             reverse_lazy('contract_details', kwargs={'pk': self.object.pk})
         )
