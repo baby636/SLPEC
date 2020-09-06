@@ -3,7 +3,7 @@ const CryptoJS = require('crypto-js')
 const jeton = require('jeton-lib')
 const slpMdm = require('slp-mdm')
 const bchaddr = require('bchaddrjs-slp')
-
+const BigNumber = require('bignumber.js')
 
 function contractCreationAcceptanceFormHandler(formElementId, pubKeyElementId, privKeyElementId, token) {
     const form = document.getElementById(formElementId)
@@ -170,3 +170,4 @@ async function withdrawFunds(
 
 window.contractCreationAcceptanceFormHandler = contractCreationAcceptanceFormHandler
 window.withdrawFunds = withdrawFunds
+window.getSLPBalanceForToken = getSLPBalanceForToken
