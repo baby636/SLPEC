@@ -93,6 +93,27 @@ class ContractDetailView(generic.DetailView):
     template_name = 'escrowapp/contract_details.html'
 
 
+class ReleaseContractFund(generic.UpdateView):
+    model = Contract
+    fields = ()
+    template_name = 'escrowapp/release_contract_fund.html'
+    success_url = reverse_lazy('contract_list')
+
+    def form_valid(self, form):
+        self.object = form.save(commit=False)
+        releaser = self.request.user
+        if releaser == self.object.party_making_offer:
+            user_who_gets_fund = self.object.party_taking_offer
+        # charge back!
+        if releaser == self.object.party_taking_offer:
+            user_who_gets_fund = self.object.party_making_offer
+
+        self.object.release_contract_fund(self, user_who_gets_fund, releaser)
+        return HttpResponseRedirect(
+            reverse_lazy('contract_details', kwargs={'pk': self.object.pk})
+        )
+
+
 @csrf_exempt
 def generate_payment_request(request, pk):
     contract = get_object_or_404(Contract, pk=pk)
