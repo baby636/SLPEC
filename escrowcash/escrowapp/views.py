@@ -195,7 +195,7 @@ def handle_payment(request, pk):
         # broadcast the transaction
         # TODO: do validation
         url = settings.BCH_REST_API_BASE_URL +\
-            '/rawtransactions/sendRawTransaction' + transaction_hex
+            '/rawtransactions/sendRawTransaction/' + transaction_hex
         result = requests.get(url)
         if not result.status_code == 200:
             print(result.text)
