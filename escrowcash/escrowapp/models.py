@@ -54,6 +54,12 @@ class Contract(models.Model):
         on_delete=models.CASCADE,
         blank=True, null=True
     )
+    party_contract_released_to = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        related_name='contracts_released_to',
+        on_delete=models.CASCADE,
+        blank=True, null=True
+    )
 
     def accept_and_build_escrow_smart_contract(self):
         url = settings.SMART_CONTRACT_SERVER_URL + '/api/build_escrow_contract'
@@ -91,3 +97,20 @@ class Contract(models.Model):
                     self.save()
                     return True
         return False
+
+    def release_contract_fund(self, user_who_gets_fund, releaser=None):
+        if user_who_gets_fund == self.party_making_offer:
+            message = 'PartyOneTakes'
+        else:
+            message = 'partyTwoTakes'
+        url = settings.SMART_CONTRACT_SERVER_URL + '/api/release_contract'
+        result = requests.post(url=url, data={'message': message})
+        assert result.status_code == 200
+        data = result.json()
+
+        self.signature = data['signature']
+        self.arbitrator_pub_key = data['arbitrator_pub_key']
+        self.party_released_escrow = releaser
+        self.party_contract_released_to = user_who_gets_fund
+        self.state = self.CONTRACT_STATES[4][0]
+        self.save()
