@@ -86,7 +86,7 @@ async function withdrawFunds(
         let stampUnitSize = new BigNumber(tokenStampData.rate / 10 ** tokenStampData.decimals)
         let stampSizeNeeded = stampUnitSize.times(
             new BigNumber(
-                estimatedTransactionSize / postOfficeData.weight.integerVaule(BigNumber.ROUND_CEIL)
+                estimatedTransactionSize / postOfficeData.weight
             )
         ).times(tokenStampData.decimals)
     }
