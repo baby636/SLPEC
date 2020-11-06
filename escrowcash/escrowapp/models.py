@@ -114,3 +114,31 @@ class Contract(models.Model):
         self.party_contract_released_to = user_who_gets_fund
         self.state = self.CONTRACT_STATES[4][0]
         self.save()
+
+
+class Ad(models.Model):
+    created = models.DateTimeField(auto_now=True)
+    modified = models.DateTimeField(auto_now_add=True)
+
+    title = models.CharField(max_length=200)
+    details = models.TextField()
+    budget = models.DecimalField(max_digits=10, decimal_places=2)
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        blank=True, null=True
+    )
+
+
+class Offer(models.Model):
+    created = models.DateTimeField(auto_now=True)
+    modified = models.DateTimeField(auto_now_add=True)
+
+    details = models.TextField()
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+    )
+    ad = models.ForeignKey(Ad, on_delete=models.CASCADE)

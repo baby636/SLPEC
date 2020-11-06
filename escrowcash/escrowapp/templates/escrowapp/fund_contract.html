@@ -1,22 +1,29 @@
 {% extends 'escrowapp/base.html' %}
 {% load static %}
 {% block content %}
-<p>Please send {{object.contract_amount}} USDf to the following address:</p>
-<p id="address"></p>
+<div class="col-md-2"></div>
+<div class="col-md-8">
+    <h4>Please send {{object.contract_amount}} SPICE to the following address:</h4>
+    <a  href="simpleledger:?r=http://{{request.META.HTTP_HOST}}{% url 'payment_request' object.pk %}">
+        simpleledger:?r=http://{{request.META.HTTP_HOST}}{% url 'payment_request' object.pk %}
+    </a>
+    <p><strong>NOTE: An extra 1% fee would be taken.</strong></p>
+    <p id="address"></p>
 
-<form id="fund_contract_form" method="post">
-    {% csrf_token %}
-    {{form}}
-    <button type="submit">Funded</button>
-</form>
+    <form id="fund_contract_form" method="post">
+        {% csrf_token %}
+        {{form}}
+        <button class="btn btn-success" type="submit">Funded</button>
+    </form>
+</div>
 
 {% endblock %}
 {% block scripts %}
-<script src="https://unpkg.com/bchaddrjs-slp@0.2.8/dist/bchaddrjs-slp-0.2.8.min.js"></script>
-<script>
-    const slpAddress = bchaddr.toSlpAddress("{{object.contract_cash_address}}")
-    document.getElementById("address").innerText = slpAddress
-</script>
+<!--<script src="https://unpkg.com/bchaddrjs-slp@0.2.8/dist/bchaddrjs-slp-0.2.8.min.js"></script>-->
+<!--<script>-->
+<!--    const slpAddress = bchaddr.toSlpAddress("{{object.contract_cash_address}}")-->
+<!--    document.getElementById("address").innerText = slpAddress-->
+<!--</script>-->
 <script src="{% static 'escrowapp/js/escrow.js' %}"></script>
 <script>
     const token = "{{object.token}}"
@@ -31,20 +38,20 @@
     }
     setTimeout(submitOnFund, 5000)
 </script>
-<script src="https://cdn.jsdelivr.net/npm/bitcoincom-link@0.1.10-ping02/lib/bitcoincom-link.min.js"></script>
-<script>
-    bitcoincomLink.sendAssets({
-      to: slpAddress,
-      protocol: 'SLP',
-      value: {{object.contract_amount}},
-      assetId: "{{object.token}}"
-    }).then((data) => {
-      console.log('Completed transaction id: ' + data.txid);
-      submitOnFund()
-    }).catch((e)=> {
-        console.log(e)
-    });
+<!--<script src="https://cdn.jsdelivr.net/npm/bitcoincom-link@0.1.10-ping02/lib/bitcoincom-link.min.js"></script>-->
+<!--<script>-->
+<!--    bitcoincomLink.sendAssets({-->
+<!--      to: slpAddress,-->
+<!--      protocol: 'SLP',-->
+<!--      value: {{object.contract_amount}},-->
+<!--      assetId: "{{object.token}}"-->
+<!--    }).then((data) => {-->
+<!--      console.log('Completed transaction id: ' + data.txid);-->
+<!--      submitOnFund()-->
+<!--    }).catch((e)=> {-->
+<!--        console.log(e)-->
+<!--    });-->
 
 
-</script>
+<!--</script>-->
 {% endblock %}

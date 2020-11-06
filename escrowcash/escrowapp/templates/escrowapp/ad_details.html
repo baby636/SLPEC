@@ -1,0 +1,37 @@
+{% extends 'escrowapp/base.html' %}
+{% load static %}
+{% load bootstrap4 %}
+
+{% block content %}
+<div class="col-md-2"></div>
+<div class="col-md-8 text-left">
+    <h2>{{object.title}}</h2>
+    <p><strong>Description:</strong> {{object.details}}</p>
+    <br>
+    <p><strong>Budget:</strong> {{object.budget}} $</p>
+    <p><strong>Poster:</strong> {{object.user}}</p>
+    <hr>
+    <h4>Proposals:</h4>
+    {% for offer in object.offer_set.all %}
+        <p>
+            {{offer.created}}, {{offer.user}}
+            <br>
+            {{offer.details}}
+            <br>
+            <a class="btn btn-success btn-sm" href="{% url 'create_contract' offer.user %}">Create Offer</a>
+        </p>
+    {% empty %}
+        There's no proposal yet.
+    {% endfor %}
+    <hr>
+    <h3>Make a proposal:</h3>
+    <form class="form" id="create_offer" method="post">
+        {% csrf_token %}
+        {% bootstrap_formset offer_formset layout='inline' %}
+        {% buttons %}
+            <button type="submit" class="btn btn-primary">Submit</button>
+        {% endbuttons %}
+    </form>
+</div>
+
+{% endblock %}

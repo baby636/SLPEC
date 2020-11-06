@@ -11,10 +11,22 @@
     </tr>
     {% for object in object_list %}
         <tr>
-            <td>{{object.party_making_offer}}</td>
-            <td>{{object.party_making_offer}}</td>
+            <td>
+                {% if request.user == object.party_making_offer %}
+                    You
+                {% else %}
+                    {{object.party_making_offer}}
+                {% endif %}
+            </td>
+            <td>
+                {% if request.user == object.party_taking_offer %}
+                    You
+                {% else %}
+                    {{object.party_making_offer}}
+                {% endif %}
+            </td>
             <td>{{object.state}}</td>
-            <td><a href="{% url 'contract_details' object.pk %}">Details</a></td>
+            <td><a class="btn btn-sm btn-outline-info" href="{% url 'contract_details' object.pk %}">Details</a></td>
         </tr>
 
     {% endfor %}

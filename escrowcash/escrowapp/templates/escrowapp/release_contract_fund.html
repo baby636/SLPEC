@@ -1,10 +1,17 @@
 {% extends 'escrowapp/base.html' %}
 {% load static %}
+{% load bootstrap4 %}
+
 {% block content %}
-<h3>Are you sure you want to release the contract escrow?</h3>
-<form id="release_contract_fund_form" method="post">
-    {% csrf_token %}
-    {{form}}
-    <button class="btn btn-success" type="submit">Release</button>
-</form>
+<div class="col-md-2"></div>
+<div class="col-md-8">
+    <h3>Are you sure you want to release the contract escrow?</h3>
+    <form id="release_contract_fund_form" method="post">
+        {% csrf_token %}
+        {% bootstrap_form form layout='inline' %}
+        {% buttons %}
+        <button class="btn btn-success" type="submit">Release</button>
+        {% endbuttons %}
+    </form>
+</div>
 {% endblock %}

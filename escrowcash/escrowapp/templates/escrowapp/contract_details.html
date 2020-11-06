@@ -1,6 +1,8 @@
 {% extends 'escrowapp/base.html' %}
 {% load static %}
 {% block content %}
+<div class="col-md-2"></div>
+<div class="col-md-8">
 <h2>Contract State: {{object.state}}</h2>
 </br>
 <!--<a class="btn btn-success" href="simpleledger:?r=http://{{request.META.HTTP_HOST}}{% url 'payment_request' object.pk %}">-->
@@ -46,20 +48,21 @@
         <button class="btn btn-success" onclick="withdraw()">Withdraw funds</button>
     {% endif %}
 {% endif %}
+    </div>
 {% endblock %}
 {% block scripts %}
-<script src="https://cdn.jsdelivr.net/npm/bitcoincom-link@0.1.10-ping02/lib/bitcoincom-link.min.js"></script>
-<script>
-    var withdrawAddress;
-    bitcoincomLink.getAddress({
-      protocol: 'BCH',
-    }).then((data) => {
-        console.log(data)
-        withdrawAddress = data.address
-    }).catch((x) => {
-        console.log(x)
-    });
-</script>
+<!--<script src="https://cdn.jsdelivr.net/npm/bitcoincom-link@0.1.10-ping02/lib/bitcoincom-link.min.js"></script>-->
+<!--<script>-->
+<!--    var withdrawAddress;-->
+<!--    bitcoincomLink.getAddress({-->
+<!--      protocol: 'BCH',-->
+<!--    }).then((data) => {-->
+<!--        console.log(data)-->
+<!--        withdrawAddress = data.address-->
+<!--    }).catch((x) => {-->
+<!--        console.log(x)-->
+<!--    });-->
+<!--</script>-->
 <script src="{% static 'escrowapp/js/escrow.js' %}"></script>
 <script>
     const token = "{{object.token}}"
@@ -75,14 +78,15 @@
             encryptedPrivKey = "{{object.party_making_offer_encrypted_priv_key}}"
     {% else %}
             message = "partyTwoTakes"
-            encryptedPrivKey = "{{object.party_making_offer_encrypted_priv_key}}"
+            encryptedPrivKey = "{{object.party_taking_offer_encrypted_priv_key}}"
     {% endif %}
 
-    const postOfficeURL = "http://127.0.0.1:3000/"
+   // const postOfficeURL = "http://127.0.0.1:3000/postage/"
+   const postOfficeURL = "https://pay.cointext.io/postage"
    function withdraw() {
         withdrawFunds(
             withdrawAddress, token, arbitratorPublicKeyString, partyMakingOfferPubKeyString,
-            partyTakingOfferPubKeyString, encryptedPrivKey, encryptedPrivKeySecret, message,
+            partyTakingOfferPubKeyString, encryptedPrivKey, encryptedPrivKeySecret, "{{object.signature}}", message,
             postOfficeURL
         )
    }

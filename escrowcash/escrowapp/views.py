@@ -12,7 +12,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
 from django.contrib.auth.decorators import login_required
 
-from .models import Contract
+from .models import *
 from . import bip70_pb2
 
 User = get_user_model()
@@ -220,3 +220,83 @@ def handle_payment(request, pk):
             payment_ack.SerializeToString(),
             content_type='application/simpleledger-paymentrequest',
         )
+
+
+@csrf_exempt
+@login_required
+def broadcast(request):
+    if request.method == 'POST':
+        url = 'https://pay.cointext.io/postage'
+        headers = {
+            'Accept': 'application/simpleledger-paymentrequest, application/simpleledger-paymentack, application/json',
+            'Content-Type': 'application/simpleledger-payment',
+            'Content-Transfer-Encoding': 'binary'
+        }
+
+        res = request.post(url, data=request.body, headers=headers)
+        response = HttpResponse(res.reason if res.status_code == 200 else res.text)
+        response.status_code = res.status_code
+        return response
+
+
+@method_decorator(login_required, name='dispatch')
+class CreateAdView(generic.CreateView):
+    model = Ad
+    fields = ('title', 'details', 'budget')
+
+    def get_form_kwargs(self):
+        form_kwargs = super().get_form_kwargs()
+
+        form_kwargs['instance'] = Ad()
+        form_kwargs['instance'].user = self.request.user
+
+        return form_kwargs
+
+    template_name = 'escrowapp/create_ad.html'
+    success_url = reverse_lazy('ad_list')
+
+
+class AdListView(generic.ListView):
+    model = Ad
+    template_name = 'escrowapp/ad_list.html'
+
+
+@method_decorator(login_required, name='dispatch')
+class AdDetails(generic.UpdateView):
+    model = Ad
+    fields = ()
+    template_name = 'escrowapp/ad_details.html'
+
+    def get_context_data(self, **kwargs):
+        context_data = super().get_context_data(**kwargs)
+        OfferFormSet = forms.inlineformset_factory(
+            Ad, Offer,
+            fields='__all__',
+            extra=1,
+            can_delete=False,
+            widgets={'user': forms.HiddenInput()}
+        )
+        offer_formset = OfferFormSet(
+            self.request.POST or None,
+            prefix='offer',
+        )
+        for form in offer_formset:
+            form.initial = {'user': self.request.user}
+
+        context_data['offer_formset'] = offer_formset
+        return context_data
+
+    def form_valid(self, form):
+        self.object = form.save()
+        OfferFormSet = forms.inlineformset_factory(Ad, Offer, fields='__all__')
+        offer_formset = OfferFormSet(
+            self.request.POST,
+            instance=self.object,
+            prefix='offer',
+        )
+
+        if offer_formset.is_valid():
+            offer_formset.save()
+            return HttpResponseRedirect(
+                reverse_lazy('ad_details', kwargs={'pk': self.object.pk})
+            )

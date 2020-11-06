@@ -1,0 +1,22 @@
+{% extends 'escrowapp/base.html' %}
+{% load static %}
+{% block content %}
+<h2>Listing</h2>
+<table class="table">
+    <tr>
+        <th>Title</th>
+        <th>Budget</th>
+        <th>User</th>
+        <th>Details</th>
+    </tr>
+    {% for object in object_list %}
+        <tr>
+            <td>{{object.title}}</td>
+            <td>${{object.budget}}</td>
+            <td>{{object.user}}</td>
+            <td><a class="btn btn-sm btn-outline-info"  href="{% url 'ad_details' object.pk %}">Details</a></td>
+        </tr>
+
+    {% endfor %}
+</table>
+{% endblock %}

@@ -63671,6 +63671,7 @@ exports.createOpReturnSend = (versionType, tokenIdHex, slpAmounts) => {
 })(this);
 
 },{}],153:[function(require,module,exports){
+(function (Buffer){
 const PaymentProtocol = require('bitcore-payment-protocol')
 const CryptoJS = require('crypto-js')
 const jeton = require('jeton-lib')
@@ -63722,6 +63723,7 @@ async function withdrawFunds(
     partyTakingOfferPubKeyString,
     encryptedPrivKey,
     encryptedPrivKeySecret,
+    signature,
     message,
     postOfficeURL
     ) {
@@ -63744,7 +63746,7 @@ async function withdrawFunds(
     const utxoDataResponse = await fetch("https://rest.bitcoin.com/v2/address/utxo/" + escrowCashAddress)
     let utxoData = await utxoDataResponse.json()
 
-    const estimatedTransactionSize = 2920 // just a big number to work TODO: later on calculate this
+    const estimatedTransactionSize = 2000 // just a big number to work TODO: later on calculate this
     // generate post office required data
     const postOfficeReponse = await fetch(postOfficeURL)
     let postOfficeData = await postOfficeReponse.json()
@@ -63756,17 +63758,18 @@ async function withdrawFunds(
         }
     }
     if (tokenStampData) {
-        let stampUnitSize = new BigNumber(tokenStampData.rate / 10 ** tokenStampData.decimals)
-        let stampSizeNeeded = stampUnitSize.times(
+        let stampUnitSize = new BigNumber(tokenStampData.rate)// / 10 ** tokenStampData.decimals)
+        var stampSizeNeeded = stampUnitSize.times(
             new BigNumber(
                 estimatedTransactionSize / postOfficeData.weight
             )
-        ).times(tokenStampData.decimals)
+        ).times(tokenStampData.decimals).integerValue(BigNumber.ROUND_CEIL)
+        console.log(stampSizeNeeded.toString())
     }
 
 
     // inputs
-    let inputUtxos = Array()
+    let inputUtxos = []
     for (let i=0; i < utxoData.utxos.length; i++) {
         utxo = utxoData.utxos[i]
         utxo.scriptPubKey = utxoData.scriptPubKey
@@ -63775,42 +63778,46 @@ async function withdrawFunds(
         )
     }
 
-    let transaction = new jeton.Transaction(inputUtxos)
+    let transaction = new jeton.Transaction().from(inputUtxos)
     // SLP
+    //stampSizeNeeded = new BigNumber('865110384')
     transaction.addData()
-    transaction.outputs[0].scriptBuffer = slpMdm.TokenType1.send(
-        token,
-        [balance.minus(stampSizeNeeded), stampSizeNeeded]
-    )
     transaction.to(withdrawAdress, 546)
     transaction.to(bchaddr.toCashAddress(postOfficeSLPAddress), 546)
 
+    const OPReturn = slpMdm.TokenType1.send(
+        token,
+        [balance.minus(stampSizeNeeded), stampSizeNeeded]
+    )
+    transaction.outputs[0]._scriptBuffer = OPReturn
     // sign escrow contract
     for (let i=0; i < inputUtxos.length; i++) {
         transaction.signEscrow(
             i,
-            CryptoJS.AES.decrypt(
+            jeton.PrivateKey(CryptoJS.AES.decrypt(
                 encryptedPrivKey,
                 encryptedPrivKeySecret
-            ).toString(CryptoJS.enc.Utf8),
+            ).toString(CryptoJS.enc.Utf8)),
             message,
+            jeton.Signature.fromString(signature),
             outScript.toScript(),
             jeton.Signature.SIGHASH_ALL | jeton.Signature.SIGHASH_FORKID | jeton.Signature.SIGHASH_ANYONECANPAY
         )
     }
+    console.log(transaction.outputs[0]._scriptBuffer.toString('hex'), 'BOOBS', transaction.toBuffer().toString('hex'))
 
     // create bip70 payment to postoffice
     let payment = new PaymentProtocol().makePayment()
     payment.set('memo', 'FREEDOM!')
     payment.set('transactions', [transaction.toBuffer()])
-    
-    let refundOutput = new PaymentProtocol().makeOutPut()
-    refundOutput.set('amount', 546)
+    payment.set('merchant_data', Buffer.from(JSON.stringify(postOfficeData)))
+    let refundOutput = new PaymentProtocol().makeOutput()
+    refundOutput.set('amount', 0)
     refundOutput.set(
         'script',
         jeton.Script.buildPublicKeyHashOut(
-            outScript.toAddress().toBuffer()
-        )
+            outScript.toAddress()
+        ).toBuffer()
     )
     payment.set('refund_to', [refundOutput.message])
 
@@ -63820,8 +63827,9 @@ async function withdrawFunds(
         'Accept': 'application/simpleledger-paymentack, application/simpleledger-paymentrequest',
         'Content-Transfer-Encoding': 'binary'
     }
+    console.log(payment.serialize().toString('hex'))
     const postOfficePaymentResponse = await fetch(
-        postOfficeURL, 
+	    'http://127.0.0.1:8000/broadcast/', 
         {
             method: 'POST',
             headers: headers,
@@ -63845,7 +63853,8 @@ window.contractCreationAcceptanceFormHandler = contractCreationAcceptanceFormHan
 window.withdrawFunds = withdrawFunds
 window.getSLPBalanceForToken = getSLPBalanceForToken
 
-},{"bchaddrjs-slp":18,"bignumber.js":21,"bitcore-payment-protocol":73,"crypto-js":216,"jeton-lib":273,"slp-mdm":148}],154:[function(require,module,exports){
+}).call(this,require("buffer").Buffer)
+},{"bchaddrjs-slp":18,"bignumber.js":21,"bitcore-payment-protocol":73,"buffer":342,"crypto-js":216,"jeton-lib":273,"slp-mdm":148}],154:[function(require,module,exports){
 'use strict'
 // base-x encoding / decoding
 // Copyright (c) 2018 base-x contributors

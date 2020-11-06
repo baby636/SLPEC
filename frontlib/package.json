@@ -8,6 +8,7 @@
   },
   "author": "OPReturnCode",
   "dependencies": {
+    "browserify": "^16.5.2",
     "crypto-js": "^4.0.0",
     "jeton-lib": "^2.1.0"
   }

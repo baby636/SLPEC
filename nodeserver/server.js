@@ -20,7 +20,7 @@ const x509PrivateKey = fs.readFileSync('my.key', "utf8");
 expressApp.post('/api/build_escrow_contract', (req, res) => {
     const arbitratorPubKey = jeton.PublicKey(arbitratorPublicKeyString)
     const partyOnePubKey = jeton.PublicKey(req.body.party_making_offer_pub_key)
-    const partyTwoPubKey = jeton.PublicKey(req.body.party_making_offer_pub_key)
+    const partyTwoPubKey = jeton.PublicKey(req.body.party_taking_offer_pub_key)
     
     const outputScriptData = {
         refereePubKey: arbitratorPubKey,

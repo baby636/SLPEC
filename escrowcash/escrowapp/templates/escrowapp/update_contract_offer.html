@@ -1,11 +1,19 @@
 {% extends 'escrowapp/base.html' %}
 {% load static %}
+{% load bootstrap4 %}
+
 {% block content %}
-<form id="update_offer_form" method="post">
-    {% csrf_token %}
-    {{form}}
-    <button type="submit">Submit</button>
-</form>
+<div class="col-md-2"></div>
+<div class="col-md-8">
+    <h2>Do you accept the contract?</h2>
+    <form id="update_offer_form" method="post">
+        {% csrf_token %}
+        {% bootstrap_form form layout='inline' %}
+        {% buttons %}
+            <button type="submit" class="btn btn-primary">Submit</button>
+        {% endbuttons %}
+    </form>
+</div>
 {% endblock %}
 {% block scripts %}
 <script src="{% static 'escrowapp/js/escrow.js' %}"></script>
